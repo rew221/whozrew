@@ -5,6 +5,7 @@ SQLite ma'lumotlar bazasi boshqaruvi
 
 import sqlite3
 import json
+import numpy as np
 import logging
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
@@ -296,6 +297,22 @@ def get_alert_history(user_id: int, limit: int = 20) -> List[Dict]:
 
 def save_signal(symbol: str, signal_data: Dict) -> None:
     """Signal ma'lumotlarini saqlash."""
+
+    import numpy as np
+
+    def clean_numpy(obj):
+        if isinstance(obj, dict):
+            return {k: clean_numpy(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [clean_numpy(v) for v in obj]
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        return obj
+
     with get_db() as conn:
         conn.execute("""
             INSERT INTO signal_history
@@ -316,7 +333,7 @@ def save_signal(symbol: str, signal_data: Dict) -> None:
             signal_data.get("entry_quality", 0),
             signal_data.get("rvol", 1.0),
             signal_data.get("trend", "SIDEWAYS"),
-            json.dumps(signal_data.get("indicators", {})),
+            json.dumps(clean_numpy(signal_data.get("indicators", {}))),
             signal_data.get("timeframe", "1h"),
         ))
 
