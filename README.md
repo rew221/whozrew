@@ -91,7 +91,7 @@ cp .env.example .env
 
 `.env` faylini oching va to'ldiring:
 ```env
-TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_BOT_TOKEN=8919586460:AAFeQXzIzjlJrS_Kt7gcqUt25HNRZ9ng8qE
 ```
 
 ### 6. Telegram Bot Token olish
