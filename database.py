@@ -296,6 +296,7 @@ def get_alert_history(user_id: int, limit: int = 20) -> List[Dict]:
 # ============================================================
 
 def save_signal(symbol: str, signal_data: Dict) -> None:
+    return
     """Signal ma'lumotlarini saqlash."""
 
     import numpy as np
