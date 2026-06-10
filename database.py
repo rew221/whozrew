@@ -32,7 +32,7 @@ def get_db():
         conn.commit()
     except Exception as e:
         conn.rollback()
-        logger.error(f"Database xatosi: {e}")
+        logger.exception("Database xatosi")
         raise
     finally:
         conn.close()
