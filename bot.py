@@ -698,13 +698,17 @@ async def _show_coin_analysis(query, context, symbol: str):
             ])
         )
 
-    except Exception as e:
-        logger.error(f"Tahlil ko'rsatish xatosi {symbol}: {e}")
-        await query.edit_message_text(
-            f"❌ Xato yuz berdi: {str(e)[:100]}",
-            parse_mode=ParseMode.HTML,
-            reply_markup=back_to_main_keyboard()
-        )
+except Exception as e:
+    logger.error(f"Tahlil ko'rsatish xatosi {symbol}: {e}")
+
+    import traceback
+    traceback.print_exc()
+
+    await query.edit_message_text(
+        f"❌ Xato yuz berdi: {str(e)[:200]}",
+        parse_mode=ParseMode.HTML,
+        reply_markup=back_to_main_keyboard()
+    )
 
 
 # ============================================================
