@@ -136,18 +136,18 @@ async def analyze_coin(session: aiohttp.ClientSession,
 
     result.structure = {
         "trend": ms.trend,
-        "support": ms.support,
-        "resistance": ms.resistance,
-        "order_block_bull": ms.order_block_bull,
-        "order_block_bear": ms.order_block_bear,
-        "fvg_bull": ms.fvg_bull,
-        "bos_bullish": ms.bos_bullish,
-        "choch_bullish": ms.choch_bullish,
-        "liquidity_sweep_bull": ms.liquidity_sweep_bull,
-        "breakout_detected": ms.breakout_detected,
-        "retest_confirmed": ms.retest_confirmed,
-        "higher_highs": ms.higher_highs,
-        "higher_lows": ms.higher_lows,
+        "support": float(ms.support),
+        "resistance": float(ms.resistance),
+        "order_block_bull": list(ms.order_block_bull) if ms.order_block_bull else None,
+        "order_block_bear": list(ms.order_block_bear) if ms.order_block_bear else None,
+        "fvg_bull": list(ms.fvg_bull) if ms.fvg_bull else None,
+        "bos_bullish": bool(ms.bos_bullish),
+        "choch_bullish": bool(ms.choch_bullish),
+        "liquidity_sweep_bull": bool(ms.liquidity_sweep_bull),
+        "breakout_detected": bool(ms.breakout_detected),
+        "retest_confirmed": bool(ms.retest_confirmed),
+        "higher_highs": bool(ms.higher_highs),
+        "higher_lows": bool(ms.higher_lows),
     }
 
     # Keshga saqlash
@@ -351,9 +351,27 @@ async def continuous_scanner(application, interval: int = SCAN_INTERVAL):
 # YORDAMCHI FUNKSIYALAR
 # ============================================================
 
+def _sanitize(obj):
+    """Numpy/non-JSON tiplarini Python native tiplarga o'tkazish."""
+    import numpy as np
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [_sanitize(i) for i in obj]
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
+
 def _signal_to_dict(signal: SignalResult) -> dict:
-    """SignalResult ni dictionary ga aylantirish."""
-    return {
+    """SignalResult ni dictionary ga aylantirish (JSON-safe)."""
+    raw = {
         "symbol": signal.symbol,
         "signal_type": signal.signal_type,
         "confidence": signal.confidence,
@@ -373,6 +391,7 @@ def _signal_to_dict(signal: SignalResult) -> dict:
         "reasoning": signal.reasoning,
         "timeframe": signal.timeframe,
     }
+    return _sanitize(raw)
 
 
 def _dict_to_signal(d: dict) -> SignalResult:
@@ -382,3 +401,4 @@ def _dict_to_signal(d: dict) -> SignalResult:
         if hasattr(s, k):
             setattr(s, k, v)
     return s
+                            
